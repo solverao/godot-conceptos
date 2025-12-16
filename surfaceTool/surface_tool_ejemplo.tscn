@@ -1,12 +1,13 @@
-[gd_scene load_steps=13 format=3 uid="uid://cumyyr8gib7tg"]
+[gd_scene load_steps=14 format=3 uid="uid://cumyyr8gib7tg"]
 
 [ext_resource type="Shader" uid="uid://hdva272l11jo" path="res://surfaceTool/surface_tool_ejemplo.gdshader" id="1_b86av"]
 [ext_resource type="Script" uid="uid://cbafxhmlfsb0h" path="res://surfaceTool/mesh_instance_3d.gd" id="1_g0qgf"]
 [ext_resource type="Texture2D" uid="uid://dn8bvbn68ctl5" path="res://models/Texture_Color_00016_.png" id="2_eqojf"]
-[ext_resource type="PackedScene" uid="uid://cf7brgwaxlmud" path="res://addons/3d_rts_camera/rtscam.tscn" id="2_jx045"]
 [ext_resource type="Texture2D" uid="uid://bqcxpkpw41e7k" path="res://models/heightMap.png" id="2_pcdmi"]
 [ext_resource type="Texture2D" uid="uid://ddjv1i1bna3ks" path="res://models/SD1.5_00005_.png" id="3_eqojf"]
 [ext_resource type="Texture2D" uid="uid://qlxi3dc0uebk" path="res://models/ComfyUI_00817_.png" id="4_un7t4"]
+[ext_resource type="Material" uid="uid://vb7346a7371q" path="res://surfaceTool/agua_material.tres" id="6_un7t4"]
+[ext_resource type="PackedScene" uid="uid://cc1m2a1obsyn4" path="res://addons/fpc/character.tscn" id="8_un7t4"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_g0qgf"]
 
@@ -48,7 +49,9 @@ navigation_mesh = SubResource("NavigationMesh_pcdmi")
 material_override = SubResource("ShaderMaterial_fqwsn")
 skeleton = NodePath("../..")
 script = ExtResource("1_g0qgf")
+material_agua = ExtResource("6_un7t4")
 mapa_altura = ExtResource("2_pcdmi")
 altura_maxima = 30.0
 
-[node name="RTScamera" parent="." instance=ExtResource("2_jx045")]
+[node name="Character" parent="." instance=ExtResource("8_un7t4")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 61.086884, 0)

@@ -1,5 +1,10 @@
 extends MeshInstance3D
 
+@export_group("Agua")
+@export var generar_agua := true
+@export var nivel_agua := 2.0  # Debería ser similar a tu altura_transicion del terreno
+@export var material_agua : Material
+
 @export var mapa_altura: Texture2D
 @export_range(0.1, 100.0, 0.1) var altura_maxima := 10.0
 @export_range(0.1, 10.0, 0.1) var escala_xz := 1.0
@@ -104,6 +109,9 @@ func generar_terreno():
 	
 	ResourceSaver.save(mesh, _ruta_cache())
 	_post_generar()
+	
+	if generar_agua:
+		crear_plano_agua(ancho, alto)
 
 func _post_generar():
 	create_trimesh_collision()
@@ -122,3 +130,31 @@ func _bytes_por_formato(formato: int) -> int:
 		_:
 			push_warning("Formato no optimizado, usando 4 bytes")
 			return 4
+
+
+func crear_plano_agua(ancho_mapa: int, alto_mapa: int):
+	# Verificar si ya existe agua previa y borrarla para evitar duplicados
+	if has_node("Agua"):
+		get_node("Agua").queue_free()
+
+	var mesh_agua = PlaneMesh.new()
+	
+	# Ajustamos el tamaño. El PlaneMesh por defecto mide 2x2, así que dividimos.
+	# Pero es más fácil asignar el size directamente:
+	mesh_agua.size = Vector2(ancho_mapa * escala_xz, alto_mapa * escala_xz)
+	
+	var agua_node = MeshInstance3D.new()
+	agua_node.name = "Agua"
+	agua_node.mesh = mesh_agua
+	agua_node.material_override = material_agua
+	
+	# Posición Y: La altura del nivel del mar
+	agua_node.position.y = nivel_agua
+	
+	# Centrado: Si tu terreno está centrado, el agua también debe estarlo (0, Y, 0).
+	# Si tu terreno NO está centrado, tienes que mover el agua al centro del mapa.
+	if not centrar_terreno:
+		agua_node.position.x = (ancho_mapa * escala_xz) / 2.0
+		agua_node.position.z = (alto_mapa * escala_xz) / 2.0
+		
+	add_child(agua_node)

@@ -1,0 +1,18 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=3 uid="uid://vb7346a7371q"]
+
+[ext_resource type="Shader" uid="uid://dxwx0gfd0mmhd" path="res://surfaceTool/agua_material.gdshader" id="1_5dun7"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_b4pl8"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_5dun7"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_5dun7")
+shader_parameter/color_agua = Color(0.12032879, 0.5893373, 0.6530517, 1)
+shader_parameter/color_espuma = Color(1, 1, 1, 1)
+shader_parameter/textura_ruido = SubResource("NoiseTexture2D_5dun7")
+shader_parameter/textura_normal = SubResource("NoiseTexture2D_b4pl8")
+shader_parameter/velocidad = 0.05
+shader_parameter/altura_olas = 0.2
+shader_parameter/borde_espuma = 1.0

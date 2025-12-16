@@ -1,0 +1,54 @@
+[gd_scene load_steps=13 format=3 uid="uid://cumyyr8gib7tg"]
+
+[ext_resource type="Shader" uid="uid://hdva272l11jo" path="res://surfaceTool/surface_tool_ejemplo.gdshader" id="1_b86av"]
+[ext_resource type="Script" uid="uid://cbafxhmlfsb0h" path="res://surfaceTool/mesh_instance_3d.gd" id="1_g0qgf"]
+[ext_resource type="Texture2D" uid="uid://dn8bvbn68ctl5" path="res://models/Texture_Color_00016_.png" id="2_eqojf"]
+[ext_resource type="PackedScene" uid="uid://cf7brgwaxlmud" path="res://addons/3d_rts_camera/rtscam.tscn" id="2_jx045"]
+[ext_resource type="Texture2D" uid="uid://bqcxpkpw41e7k" path="res://models/heightMap.png" id="2_pcdmi"]
+[ext_resource type="Texture2D" uid="uid://ddjv1i1bna3ks" path="res://models/SD1.5_00005_.png" id="3_eqojf"]
+[ext_resource type="Texture2D" uid="uid://qlxi3dc0uebk" path="res://models/ComfyUI_00817_.png" id="4_un7t4"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_g0qgf"]
+
+[sub_resource type="Sky" id="Sky_jx045"]
+sky_material = SubResource("ProceduralSkyMaterial_g0qgf")
+
+[sub_resource type="Environment" id="Environment_pcdmi"]
+background_mode = 2
+sky = SubResource("Sky_jx045")
+volumetric_fog_density = 0.02
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_pcdmi"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fqwsn"]
+render_priority = 0
+shader = ExtResource("1_b86av")
+shader_parameter/textura_arena = ExtResource("2_eqojf")
+shader_parameter/textura_pasto = ExtResource("3_eqojf")
+shader_parameter/textura_roca = ExtResource("4_un7t4")
+shader_parameter/fuerza_relieve = 1.0
+shader_parameter/altura_transicion = 2.0
+shader_parameter/suavizado_altura = 1.0
+shader_parameter/umbral_pendiente = 0.7
+shader_parameter/suavizado_pendiente = 0.1
+shader_parameter/escala_textura = 20.0
+
+[node name="SurfaceToolEjemplo" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.845793, 0.5335112, 0, -0.5335112, 0.845793, 0, 0, 0)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_pcdmi")
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_pcdmi")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D"]
+material_override = SubResource("ShaderMaterial_fqwsn")
+skeleton = NodePath("../..")
+script = ExtResource("1_g0qgf")
+mapa_altura = ExtResource("2_pcdmi")
+altura_maxima = 30.0
+
+[node name="RTScamera" parent="." instance=ExtResource("2_jx045")]
