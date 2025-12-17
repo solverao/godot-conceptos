@@ -1,12 +1,15 @@
-[gd_scene load_steps=15 format=3 uid="uid://cumyyr8gib7tg"]
+[gd_scene load_steps=18 format=3 uid="uid://cumyyr8gib7tg"]
 
 [ext_resource type="Shader" uid="uid://hdva272l11jo" path="res://surfaceTool/surface_tool_ejemplo.gdshader" id="1_b86av"]
 [ext_resource type="Script" uid="uid://cbafxhmlfsb0h" path="res://surfaceTool/mesh_instance_3d.gd" id="1_g0qgf"]
-[ext_resource type="Texture2D" uid="uid://dn8bvbn68ctl5" path="res://models/Texture_Color_00016_.png" id="2_eqojf"]
+[ext_resource type="Texture2D" uid="uid://16emkdqb774d" path="res://models/ground/Ground054_1K-JPG_NormalGL.jpg" id="2_6sk86"]
 [ext_resource type="Texture2D" uid="uid://bqcxpkpw41e7k" path="res://models/heightMap.png" id="2_pcdmi"]
-[ext_resource type="Texture2D" uid="uid://ddjv1i1bna3ks" path="res://models/SD1.5_00005_.png" id="3_eqojf"]
-[ext_resource type="Texture2D" uid="uid://qlxi3dc0uebk" path="res://models/ComfyUI_00817_.png" id="4_un7t4"]
+[ext_resource type="Texture2D" uid="uid://c2320frii5c7a" path="res://models/ground/Grass003_1K-JPG_NormalGL.jpg" id="3_2ypep"]
+[ext_resource type="Texture2D" uid="uid://ddagsns71nj8a" path="res://models/ground/Ground054_1K-JPG_Color.jpg" id="4_2ypep"]
+[ext_resource type="Texture2D" uid="uid://dbu8pitfl6v6p" path="res://models/ground/Ground085_1K-JPG_NormalGL.jpg" id="4_perjh"]
+[ext_resource type="Texture2D" uid="uid://csu1jg0w3w17u" path="res://models/ground/Grass003_1K-JPG_Color.jpg" id="6_perjh"]
 [ext_resource type="Material" uid="uid://vb7346a7371q" path="res://surfaceTool/agua_material.tres" id="6_un7t4"]
+[ext_resource type="Texture2D" uid="uid://dd7bhbyop4o3q" path="res://models/ground/Ground085_1K-JPG_Color.jpg" id="7_w8mbc"]
 [ext_resource type="ArrayMesh" uid="uid://c3qlqtqvd2ygi" path="res://models/tree_simple.obj" id="7_xegnv"]
 [ext_resource type="PackedScene" uid="uid://cc1m2a1obsyn4" path="res://addons/fpc/character.tscn" id="8_un7t4"]
 
@@ -30,15 +33,19 @@ volumetric_fog_albedo = Color(0.60694283, 0.6632327, 0.39270288, 1)
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fqwsn"]
 render_priority = 0
 shader = ExtResource("1_b86av")
-shader_parameter/textura_arena = ExtResource("2_eqojf")
-shader_parameter/textura_pasto = ExtResource("3_eqojf")
-shader_parameter/textura_roca = ExtResource("4_un7t4")
+shader_parameter/textura_arena = ExtResource("4_2ypep")
+shader_parameter/textura_pasto = ExtResource("6_perjh")
+shader_parameter/textura_roca = ExtResource("7_w8mbc")
+shader_parameter/normal_arena = ExtResource("2_6sk86")
+shader_parameter/normal_pasto = ExtResource("3_2ypep")
+shader_parameter/normal_roca = ExtResource("4_perjh")
 shader_parameter/fuerza_relieve = 1.0
 shader_parameter/altura_transicion = 2.0
 shader_parameter/suavizado_altura = 1.0
 shader_parameter/umbral_pendiente = 0.7
 shader_parameter/suavizado_pendiente = 0.1
 shader_parameter/escala_textura = 20.0
+shader_parameter/escala_triplanar = 0.1
 
 [node name="SurfaceToolEjemplo" type="Node3D"]
 
@@ -53,14 +60,15 @@ environment = SubResource("Environment_pcdmi")
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
 navigation_mesh = SubResource("NavigationMesh_pcdmi")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D"]
-material_override = SubResource("ShaderMaterial_fqwsn")
-skeleton = NodePath("../..")
-script = ExtResource("1_g0qgf")
-material_agua = ExtResource("6_un7t4")
-mesh_arbol = ExtResource("7_xegnv")
-mapa_altura = ExtResource("2_pcdmi")
-altura_maxima = 30.0
-
 [node name="Character" parent="." instance=ExtResource("8_un7t4")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 61.086884, 0)
+acceleration = 15.0
+jump_velocity = 6.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = SubResource("ShaderMaterial_fqwsn")
+script = ExtResource("1_g0qgf")
+mapa_altura = ExtResource("2_pcdmi")
+altura_maxima = 90.0
+material_agua = ExtResource("6_un7t4")
+mesh_arbol = ExtResource("7_xegnv")
