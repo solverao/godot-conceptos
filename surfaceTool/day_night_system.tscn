@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://jexsuydl75q5"]
+
+[ext_resource type="Script" uid="uid://bi038ckrj4t5e" path="res://surfaceTool/day_night_system.gd" id="1_xd5ob"]
+
+[node name="DayNightSystem" type="Node3D"]
+script = ExtResource("1_xd5ob")
