@@ -5,6 +5,18 @@ extends MeshInstance3D
 @export var nivel_agua := 2.0  # Debería ser similar a tu altura_transicion del terreno
 @export var material_agua : Material
 
+@export_group("Vegetación")
+@export var mesh_arbol: Mesh
+@export var cantidad_arboles: int = 900
+@export var escala_arbol_min: float = 0.8
+@export var escala_arbol_max: float = 1.5
+# Altura mínima para que crezca un árbol (evitar arena/agua)
+@export var altura_minima_vegetacion: float = 2.5
+# Qué tan empinado puede ser el terreno (0.0 pared, 1.0 plano). 
+# 0.7 es aprox 45 grados.
+@export var umbral_pendiente_arboles: float = 0.7
+
+
 @export var mapa_altura: Texture2D
 @export_range(0.1, 100.0, 0.1) var altura_maxima := 10.0
 @export_range(0.1, 10.0, 0.1) var escala_xz := 1.0
@@ -22,6 +34,7 @@ func _ready():
 		return
 	
 	generar_terreno()
+	generar_vegetacion()
 
 func _ruta_cache() -> String:
 	var hash := str(mapa_altura.resource_path, altura_maxima, escala_xz).hash()
@@ -158,3 +171,100 @@ func crear_plano_agua(ancho_mapa: int, alto_mapa: int):
 		agua_node.position.z = (alto_mapa * escala_xz) / 2.0
 		
 	add_child(agua_node)
+
+
+func generar_vegetacion():
+	if mesh_arbol == null:
+		print("No hay mesh de árbol asignado")
+		return
+
+	# Limpiar vegetación anterior si existe
+	if has_node("Vegetacion"):
+		get_node("Vegetacion").queue_free()
+
+	# Crear el nodo MultiMeshInstance3D
+	var mmi = MultiMeshInstance3D.new()
+	mmi.name = "Vegetacion"
+	var mm = MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = mesh_arbol
+	# Reservamos espacio para los árboles (esto no los dibuja aún, solo asigna memoria)
+	mm.instance_count = cantidad_arboles 
+	mmi.multimesh = mm
+	add_child(mmi)
+
+	# Datos necesarios para calcular posiciones
+	var img := mapa_altura.get_image()
+	var ancho := img.get_width()
+	var alto := img.get_height()
+	var offset_x := (ancho * escala_xz) / 2.0 if centrar_terreno else 0.0
+	var offset_z := (alto * escala_xz) / 2.0 if centrar_terreno else 0.0
+	
+	var rng = RandomNumberGenerator.new()
+	rng.randomize()
+	
+	var arboles_colocados = 0
+	
+	# Intentamos colocar árboles hasta llenar el cupo
+	# Usamos un bucle while para reintentar si caen en agua o roca
+	var intentos = 0
+	var max_intentos = cantidad_arboles * 5 # Evitar bucle infinito
+	
+	while arboles_colocados < cantidad_arboles and intentos < max_intentos:
+		intentos += 1
+		
+		# 1. Posición aleatoria en la imagen (evitando los bordes exactos)
+		var px = rng.randi_range(1, ancho - 2)
+		var pz = rng.randi_range(1, alto - 2)
+		
+		# 2. Obtener altura (0 a 1)
+		var h_pixel = img.get_pixel(px, pz).r
+		var altura_real = h_pixel * altura_maxima
+		
+		# FILTRO 1: Altura (No agua, no arena)
+		if altura_real < altura_minima_vegetacion:
+			continue # Saltar al siguiente intento
+			
+		# 3. Calcular pendiente (Normal)
+		# Comparamos la altura del vecino derecho y el vecino de abajo
+		var h_derecha = img.get_pixel(px + 1, pz).r * altura_maxima
+		var h_abajo = img.get_pixel(px, pz + 1).r * altura_maxima
+		
+		var vec_u = Vector3(escala_xz, h_derecha - altura_real, 0)
+		var vec_v = Vector3(0, h_abajo - altura_real, escala_xz)
+		var normal = vec_v.cross(vec_u).normalized()
+		
+		# FILTRO 2: Pendiente (No paredes de roca)
+		# Producto punto con Vector Arriba (0,1,0). 1 es plano, 0 es vertical.
+		if normal.dot(Vector3.UP) < umbral_pendiente_arboles:
+			continue
+		
+		# --- ÉXITO: Colocar Árbol ---
+		var pos_x = px * escala_xz - offset_x
+		var pos_z = pz * escala_xz - offset_z
+		
+		var transform = Transform3D()
+		# Posición
+		transform.origin = Vector3(pos_x, altura_real, pos_z)
+		
+		# Rotación aleatoria en Y (para que no se vean todos iguales)
+		transform = transform.rotated_local(Vector3.UP, rng.randf() * TAU)
+		
+		# Escala aleatoria
+		var escala_random = rng.randf_range(escala_arbol_min, escala_arbol_max)
+		transform = transform.scaled_local(Vector3.ONE * escala_random)
+		
+		# Alinear con el terreno (Opcional, si quieres que crezcan torcidos en laderas)
+		# Si prefieres que crezcan siempre rectos hacia arriba, borra las siguientes 3 líneas:
+		# var up = Vector3.UP
+		# var axis = up.cross(normal).normalized()
+		# var angle = acos(up.dot(normal))
+		# if axis.length_squared() > 0.001: transform = transform.rotated(axis, angle * 0.5) 
+		
+		# Guardar en el MultiMesh
+		mm.set_instance_transform(arboles_colocados, transform)
+		arboles_colocados += 1
+	
+	# Si no logramos poner todos (por falta de espacio válido), recortamos el array para no dibujar fantasmas
+	mm.visible_instance_count = arboles_colocados
+	print("Se colocaron ", arboles_colocados, " árboles.")
